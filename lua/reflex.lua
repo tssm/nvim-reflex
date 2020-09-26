@@ -68,4 +68,33 @@ end
 cmd("augroup MkdirIfNeeded")
 cmd("autocmd!")
 cmd("autocmd BufWritePre * lua require'reflex'['mkdir-if-needed']()")
-return cmd("augroup END")
+cmd("augroup END")
+local delete_buffer_and_file = nil
+do
+  local v_0_ = nil
+  do
+    local v_0_0 = nil
+    local function delete_buffer_and_file0()
+      local buffer_name = call("expand", {"%"})
+      if ((call("getbufvar", {buffer_name, "&mod"}) == 0) or (call("confirm", {"There are unsaved changes. Delete anyway?"}) == 1)) then
+        if (call("glob", {buffer_name}) ~= "") then
+          if (call("delete", {buffer_name}) == 0) then
+            return cmd(("bwipeout! " .. buffer_name))
+          else
+            cmd("echohl ErrorMsg")
+            cmd("echo \"Can't delete asociated file\n\"")
+            return cmd("echohl None")
+          end
+        else
+          return cmd(("bwipeout! " .. buffer_name))
+        end
+      end
+    end
+    v_0_0 = delete_buffer_and_file0
+    _0_0["delete-buffer-and-file"] = v_0_0
+    v_0_ = v_0_0
+  end
+  _0_0["aniseed/locals"]["delete-buffer-and-file"] = v_0_
+  delete_buffer_and_file = v_0_
+end
+return cmd("command! Delete lua require'reflex'['delete-buffer-and-file']()")

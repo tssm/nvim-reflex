@@ -24,3 +24,26 @@
 (cmd "autocmd!")
 (cmd "autocmd BufWritePre * lua require'reflex'['mkdir-if-needed']()")
 (cmd "augroup END")
+
+(defn delete-buffer-and-file []
+	"Wipeout the current buffer and delete its associated file if it exists"
+	(local buffer-name (call :expand ["%"]))
+	(when (or
+		; The buffer hasn't change
+		(= (call :getbufvar [buffer-name "&mod"]) 0)
+		; The user confirms to delete it
+		(= (call :confirm ["There are unsaved changes. Delete anyway?"]) 1))
+		; There's a file for the buffer
+		(if (not= (call :glob [buffer-name]) "")
+			(if (= (call :delete [buffer-name]) 0)
+				; The file was deleted
+				(cmd (.. "bwipeout! " buffer-name))
+				; The file wasn't deleted
+				(do
+					(cmd "echohl ErrorMsg")
+					(cmd (.. "echo \"Can't delete asociated file\n\""))
+					(cmd "echohl None")))
+			; There's no file for the buffer
+			(cmd (.. "bwipeout! " buffer-name)))))
+
+(cmd "command! Delete lua require'reflex'['delete-buffer-and-file']()")
