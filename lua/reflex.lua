@@ -15,10 +15,11 @@ do
   _0_0 = module_0_
 end
 local function _2_(...)
-  _0_0["aniseed/local-fns"] = {}
-  return {}
+  _0_0["aniseed/local-fns"] = {require = {util = "aniseed.nvim.util"}}
+  return {require("aniseed.nvim.util")}
 end
 local _1_ = _2_(...)
+local util = _1_[1]
 do local _ = ({nil, _0_0, {{}, nil}})[2] end
 local api = nil
 do
@@ -105,4 +106,55 @@ do
   _0_0["aniseed/locals"]["delete-buffer-and-file"] = v_0_
   delete_buffer_and_file = v_0_
 end
-return cmd("command! Delete lua require'reflex'['delete-buffer-and-file']()")
+cmd("command! Delete lua require'reflex'['delete-buffer-and-file']()")
+local new_path_in_writable_location = nil
+do
+  local v_0_ = nil
+  local function new_path_in_writable_location0(path)
+    local part = path
+    while (call("glob", {part}) == "") do
+      part = call("fnamemodify", {part, ":h"})
+    end
+    if (call("filewritable", {part}) > 0) then
+      return true
+    else
+      return false
+    end
+  end
+  v_0_ = new_path_in_writable_location0
+  _0_0["aniseed/locals"]["new-path-in-writable-location"] = v_0_
+  new_path_in_writable_location = v_0_
+end
+local move_to = nil
+do
+  local v_0_ = nil
+  do
+    local v_0_0 = nil
+    local function move_to0(new_path)
+      local current_path = call("expand", {"%"})
+      if ((call("glob", {new_path}) == "") or (call("confirm", {(new_path .. " already exists. Overwrite it?")}) == 1)) then
+        local containing_directory = call("fnamemodify", {current_path, ":h"})
+        if (call("filewritable", {containing_directory}) == 2) then
+          if new_path_in_writable_location(new_path) then
+            cmd(("keepalt saveas! " .. new_path))
+            if (current_path ~= "") then
+              cmd(("bwipeout! " .. current_path))
+              return call("delete", {current_path})
+            end
+          else
+            return show_error(("Cannot write to " .. new_path))
+          end
+        else
+          return show_error(("Cannot move " .. current_path))
+        end
+      end
+    end
+    v_0_0 = move_to0
+    _0_0["move-to"] = v_0_0
+    v_0_ = v_0_0
+  end
+  _0_0["aniseed/locals"]["move-to"] = v_0_
+  move_to = v_0_
+end
+util["fn-bridge"]("MoveTo", "reflex", "move-to")
+return cmd("command! -nargs=1 -complete=file MoveTo call MoveTo(<f-args>)")

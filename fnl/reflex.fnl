@@ -1,4 +1,4 @@
-(module reflex)
+(module reflex {require {util aniseed.nvim.util}})
 
 (def- api vim.api)
 (def- call api.nvim_call_function)
@@ -46,3 +46,36 @@
 			(cmd (.. "bwipeout! " buffer-name)))))
 
 (cmd "command! Delete lua require'reflex'['delete-buffer-and-file']()")
+
+; Determines if the new path or its existent part is writable
+(defn- new-path-in-writable-location [path]
+	(var part path)
+	(while (= (call :glob [part]) "")
+		(set part (call :fnamemodify [part ":h"])))
+	(if (> (call :filewritable [part]) 0) true false))
+
+(defn move-to [new-path]
+	"Move file asociated with the current buffer to a new location"
+	(local current-path (call :expand ["%"]))
+	(when (or
+		; The new file doesn't exists
+		(= (call :glob [new-path]) "")
+		; User accepts to overwrite it if it exists
+		(= (call :confirm [(.. new-path " already exists. Overwrite it?")]) 1))
+		(local containing-directory (call :fnamemodify [current-path ":h"]))
+		; Ensure the original file can be deleted
+		(if (= (call :filewritable [containing-directory]) 2)
+			; Ensure the new path can be writen
+			(if (new-path-in-writable-location new-path)
+				(do
+					(cmd (.. "keepalt saveas! " new-path))
+					; Only try to delete current file and buffer if they have a name
+					(when (not= current-path "")
+						(cmd (.. "bwipeout! " current-path))
+						(call :delete [current-path])))
+				(show-error (.. "Cannot write to " new-path)))
+			; Current file is not writable
+			(show-error (.. "Cannot move " current-path)))))
+
+(util.fn-bridge "MoveTo" "reflex" "move-to")
+(cmd "command! -nargs=1 -complete=file MoveTo call MoveTo(<f-args>)")
