@@ -4,6 +4,11 @@
 (def- call api.nvim_call_function)
 (def- cmd api.nvim_command)
 
+(defn- show-error [e]
+	(cmd "echohl ErrorMsg")
+	(cmd (.. "echo \"" e "\n\""))
+	(cmd "echohl None"))
+
 (defn mkdir-if-needed []
 	"Ask the user if missing directories should be created when attempts to
 	write to disk a buffer whose full path doesn't exist"
@@ -15,10 +20,7 @@
 		(= (call :confirm [(.. path-head " doesn't exist. Create it?")]) 1))
 		; Try to create missing directories
 		(local (success e) (pcall #(call :mkdir [path-head "p"])))
-		(when (not success)
-			(cmd "echohl ErrorMsg")
-			(cmd (.. "echo \"" e "\n\n\""))
-			(cmd "echohl None"))))
+		(when (not success) (show-error (.. e "\n")))))
 
 (cmd "augroup MkdirIfNeeded")
 (cmd "autocmd!")
@@ -39,10 +41,7 @@
 				; The file was deleted
 				(cmd (.. "bwipeout! " buffer-name))
 				; The file wasn't deleted
-				(do
-					(cmd "echohl ErrorMsg")
-					(cmd (.. "echo \"Can't delete asociated file\n\""))
-					(cmd "echohl None")))
+				(show-error "Can't delete asociated file"))
 			; There's no file for the buffer
 			(cmd (.. "bwipeout! " buffer-name)))))
 

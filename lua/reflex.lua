@@ -38,6 +38,18 @@ do
   _0_0["aniseed/locals"]["cmd"] = v_0_
   cmd = v_0_
 end
+local show_error = nil
+do
+  local v_0_ = nil
+  local function show_error0(e)
+    cmd("echohl ErrorMsg")
+    cmd(("echo \"" .. e .. "\n\""))
+    return cmd("echohl None")
+  end
+  v_0_ = show_error0
+  _0_0["aniseed/locals"]["show-error"] = v_0_
+  show_error = v_0_
+end
 local mkdir_if_needed = nil
 do
   local v_0_ = nil
@@ -52,9 +64,7 @@ do
         end
         success, e = pcall(_3_)
         if not success then
-          cmd("echohl ErrorMsg")
-          cmd(("echo \"" .. e .. "\n\n\""))
-          return cmd("echohl None")
+          return show_error((e .. "\n"))
         end
       end
     end
@@ -81,9 +91,7 @@ do
           if (call("delete", {buffer_name}) == 0) then
             return cmd(("bwipeout! " .. buffer_name))
           else
-            cmd("echohl ErrorMsg")
-            cmd("echo \"Can't delete asociated file\n\"")
-            return cmd("echohl None")
+            return show_error("Can't delete asociated file")
           end
         else
           return cmd(("bwipeout! " .. buffer_name))
