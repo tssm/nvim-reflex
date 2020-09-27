@@ -1,4 +1,6 @@
-(module reflex {require {util aniseed.nvim.util}})
+(module reflex {require {
+	a aniseed.core
+	util aniseed.nvim.util}})
 
 (def- api vim.api)
 (def- call api.nvim_call_function)
@@ -79,3 +81,34 @@
 
 (util.fn-bridge "MoveTo" "reflex" "move-to")
 (cmd "command! -nargs=1 -complete=file MoveTo call MoveTo(<f-args>)")
+
+; Because the user can set shellslash at run-time a function is used instead of
+; a local variable
+(defn- delimiter []
+	(if (or
+		(= (call :exists ["+shellslash"]) 0)
+		(= (api.nvim_get_option ["&shellslash"]) 1))
+		"/"
+		"\\"))
+
+(defn complete-rename [prefix cmd cursor-position]
+	"Complete paths relative to current buffer location"
+	(local root (.. (call :expand ["%:p:h"]) (delimiter)))
+	(a.map
+		#(call :substitute [$1 root "" ""])
+		; Two last arguments: espect suffixes and wildignore (default), and return
+		; a list
+		(call :glob [(.. root prefix "*") false true])))
+
+(defn rename-to [input]
+	"Move file asociated with the current to a new location relative to the
+	current one"
+	(local current-directory (call :expand ["%:h"]))
+	(local new-partial-path (if (= current-directory "")
+		(call :getcwd [])
+		current-directory))
+	(move-to (.. new-partial-path (delimiter) input)))
+
+(util.fn-bridge "CompleteRename" "reflex" "complete-rename" {:return true})
+(util.fn-bridge "RenameTo" "reflex" "rename-to")
+(cmd "command! -nargs=1 -complete=customlist,CompleteRename RenameTo call RenameTo(<f-args>)")

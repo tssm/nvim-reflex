@@ -15,11 +15,12 @@ do
   _0_0 = module_0_
 end
 local function _2_(...)
-  _0_0["aniseed/local-fns"] = {require = {util = "aniseed.nvim.util"}}
-  return {require("aniseed.nvim.util")}
+  _0_0["aniseed/local-fns"] = {require = {a = "aniseed.core", util = "aniseed.nvim.util"}}
+  return {require("aniseed.core"), require("aniseed.nvim.util")}
 end
 local _1_ = _2_(...)
-local util = _1_[1]
+local a = _1_[1]
+local util = _1_[2]
 do local _ = ({nil, _0_0, {{}, nil}})[2] end
 local api = nil
 do
@@ -157,4 +158,62 @@ do
   move_to = v_0_
 end
 util["fn-bridge"]("MoveTo", "reflex", "move-to")
-return cmd("command! -nargs=1 -complete=file MoveTo call MoveTo(<f-args>)")
+cmd("command! -nargs=1 -complete=file MoveTo call MoveTo(<f-args>)")
+local delimiter = nil
+do
+  local v_0_ = nil
+  local function delimiter0()
+    if ((call("exists", {"+shellslash"}) == 0) or (api.nvim_get_option({"&shellslash"}) == 1)) then
+      return "/"
+    else
+      return "\\"
+    end
+  end
+  v_0_ = delimiter0
+  _0_0["aniseed/locals"]["delimiter"] = v_0_
+  delimiter = v_0_
+end
+local complete_rename = nil
+do
+  local v_0_ = nil
+  do
+    local v_0_0 = nil
+    local function complete_rename0(prefix, cmd0, cursor_position)
+      local root = (call("expand", {"%:p:h"}) .. delimiter())
+      local function _3_(_241)
+        return call("substitute", {_241, root, "", ""})
+      end
+      return a.map(_3_, call("glob", {(root .. prefix .. "*"), false, true}))
+    end
+    v_0_0 = complete_rename0
+    _0_0["complete-rename"] = v_0_0
+    v_0_ = v_0_0
+  end
+  _0_0["aniseed/locals"]["complete-rename"] = v_0_
+  complete_rename = v_0_
+end
+local rename_to = nil
+do
+  local v_0_ = nil
+  do
+    local v_0_0 = nil
+    local function rename_to0(input)
+      local current_directory = call("expand", {"%:h"})
+      local new_partial_path = nil
+      if (current_directory == "") then
+        new_partial_path = call("getcwd", {})
+      else
+        new_partial_path = current_directory
+      end
+      return move_to((new_partial_path .. delimiter() .. input))
+    end
+    v_0_0 = rename_to0
+    _0_0["rename-to"] = v_0_0
+    v_0_ = v_0_0
+  end
+  _0_0["aniseed/locals"]["rename-to"] = v_0_
+  rename_to = v_0_
+end
+util["fn-bridge"]("CompleteRename", "reflex", "complete-rename", {["return"] = true})
+util["fn-bridge"]("RenameTo", "reflex", "rename-to")
+return cmd("command! -nargs=1 -complete=customlist,CompleteRename RenameTo call RenameTo(<f-args>)")
