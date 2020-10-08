@@ -81,6 +81,27 @@ cmd("augroup MkdirIfNeeded")
 cmd("autocmd!")
 cmd("autocmd BufWritePre * lua require'reflex'['mkdir-if-needed']()")
 cmd("augroup END")
+local delete_file = nil
+do
+  local v_0_ = nil
+  local function delete_file0(file_name)
+    local exists, cmd0 = nil, nil
+    local function _3_()
+      return api.nvim_get_var("reflex_delete_cmd")
+    end
+    exists, cmd0 = pcall(_3_)
+    local _4_
+    if exists then
+      _4_ = os.execute((cmd0 .. " " .. file_name))
+    else
+      _4_ = call("delete", {file_name})
+    end
+    return (_4_ == 0)
+  end
+  v_0_ = delete_file0
+  _0_0["aniseed/locals"]["delete-file"] = v_0_
+  delete_file = v_0_
+end
 local delete_buffer_and_file = nil
 do
   local v_0_ = nil
@@ -90,7 +111,7 @@ do
       local buffer_name = call("expand", {"%"})
       if ((call("getbufvar", {buffer_name, "&mod"}) == 0) or (call("confirm", {"There are unsaved changes. Delete anyway?"}) == 1)) then
         if (call("glob", {buffer_name}) ~= "") then
-          if (call("delete", {buffer_name}) == 0) then
+          if delete_file(buffer_name) then
             return cmd(("bwipeout! " .. buffer_name))
           else
             return show_error("Can't delete asociated file")

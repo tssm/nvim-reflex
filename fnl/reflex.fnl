@@ -29,6 +29,14 @@
 (cmd "autocmd BufWritePre * lua require'reflex'['mkdir-if-needed']()")
 (cmd "augroup END")
 
+(defn- delete-file [file-name]
+	(local (exists cmd) (pcall #(api.nvim_get_var "reflex_delete_cmd")))
+	(= (if exists
+		; There's an external command
+		(os.execute (.. cmd " " file-name))
+		; There's no external commad
+		(call :delete [file-name])) 0))
+
 (defn delete-buffer-and-file []
 	"Wipeout the current buffer and delete its associated file if it exists"
 	(local buffer-name (call :expand ["%"]))
@@ -39,7 +47,7 @@
 		(= (call :confirm ["There are unsaved changes. Delete anyway?"]) 1))
 		; There's a file for the buffer
 		(if (not= (call :glob [buffer-name]) "")
-			(if (= (call :delete [buffer-name]) 0)
+			(if (delete-file buffer-name)
 				; The file was deleted
 				(cmd (.. "bwipeout! " buffer-name))
 				; The file wasn't deleted
