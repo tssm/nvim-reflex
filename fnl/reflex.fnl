@@ -1,6 +1,4 @@
-(module reflex {require {
-	a aniseed.core
-	util aniseed.nvim.util}})
+(module reflex {require {a aniseed.core}})
 
 (def- api vim.api)
 (def- call api.nvim_call_function)
@@ -55,8 +53,6 @@
 			; There's no file for the buffer
 			(cmd (.. "bwipeout! " buffer-name)))))
 
-(cmd "command! Delete lua require'reflex'['delete-buffer-and-file']()")
-
 ; Determines if the new path or its existent part is writable
 (defn- new-path-in-writable-location [path]
 	(var part path)
@@ -87,9 +83,6 @@
 			; Current file is not writable
 			(show-error (.. "Cannot move " current-path)))))
 
-(util.fn-bridge "MoveTo" "reflex" "move-to")
-(cmd "command! -nargs=1 -complete=file MoveTo call MoveTo(<f-args>)")
-
 ; Because the user can set shellslash at run-time a function is used instead of
 ; a local variable
 (defn- delimiter []
@@ -117,6 +110,3 @@
 		current-directory))
 	(move-to (.. new-partial-path (delimiter) input)))
 
-(util.fn-bridge "CompleteRename" "reflex" "complete-rename" {:return true})
-(util.fn-bridge "RenameTo" "reflex" "rename-to")
-(cmd "command! -nargs=1 -complete=customlist,CompleteRename RenameTo call RenameTo(<f-args>)")
