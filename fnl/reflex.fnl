@@ -35,6 +35,10 @@
 		; There's no external commad
 		(call :delete [file-name])) 0))
 
+(defn- wipe-buffer [name]
+	(local (exists command) (pcall #(api.nvim_get_var "reflex_delete_buffer_cmd")))
+	(cmd (.. (if exists command "bwipeout!") " " name)))
+
 (defn delete-buffer-and-file []
 	"Wipeout the current buffer and delete its associated file if it exists"
 	(local buffer-name (call :expand ["%"]))
@@ -47,11 +51,11 @@
 		(if (not= (call :glob [buffer-name]) "")
 			(if (delete-file buffer-name)
 				; The file was deleted
-				(cmd (.. "bwipeout! " buffer-name))
+				(wipe-buffer buffer-name)
 				; The file wasn't deleted
 				(show-error "Can't delete asociated file"))
 			; There's no file for the buffer
-			(cmd (.. "bwipeout! " buffer-name)))))
+			(wipe-buffer buffer-name))))
 
 ; Determines if the new path or its existent part is writable
 (defn- new-path-in-writable-location [path]
@@ -77,7 +81,7 @@
 					(cmd (.. "keepalt saveas! " new-path))
 					; Only try to delete current file and buffer if they have a name
 					(when (not= current-path "")
-						(cmd (.. "bwipeout! " current-path))
+						(wipe-buffer current-path)
 						(call :delete [current-path])))
 				(show-error (.. "Cannot write to " new-path)))
 			; Current file is not writable
