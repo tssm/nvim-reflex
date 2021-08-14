@@ -1,5 +1,6 @@
-(local cmd vim.api.nvim_command)
-(local util (require :aniseed.nvim.util))
+(module init {require {util reflex.aniseed.nvim.util}})
+
+(def- cmd vim.api.nvim_command)
 
 (cmd "command! Delete lua require'reflex'['delete-buffer-and-file']()")
 

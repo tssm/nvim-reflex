@@ -1,4 +1,4 @@
-(module reflex {require {a aniseed.core}})
+(module reflex {require {a reflex.aniseed.core}})
 
 (def- api vim.api)
 (def- call api.nvim_call_function)
