@@ -53,4 +53,9 @@ util["fn-bridge"]("MoveTo", "reflex", "move-to")
 cmd0("command! -nargs=1 -complete=file MoveTo call MoveTo(<f-args>)")
 util["fn-bridge"]("CompleteRename", "reflex", "complete-rename")
 util["fn-bridge"]("RenameTo", "reflex", "rename-to")
-return cmd0("command! -nargs=1 -complete=customlist,CompleteRename RenameTo call RenameTo(<f-args>)")
+cmd0("command! -nargs=1 -complete=customlist,CompleteRename RenameTo call RenameTo(<f-args>)")
+if vim.g.reflex_delete_cmd then
+  vim.api.nvim_echo({{"reflex_delete_cmd will be removed, use reflex_delete_file_cmd instead", "WarningMsg"}}, true, {})
+  vim.g.reflex_delete_file_cmd = vim.g.reflex_delete_cmd
+  return nil
+end

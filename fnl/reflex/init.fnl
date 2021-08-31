@@ -28,7 +28,7 @@
 (cmd "augroup END")
 
 (defn- delete-file [file-name]
-	(local (exists cmd) (pcall #(api.nvim_get_var "reflex_delete_cmd")))
+	(local (exists cmd) (pcall #(api.nvim_get_var "reflex_delete_file_cmd")))
 	(= (if exists
 		; There's an external command
 		(os.execute (.. cmd " " file-name))

@@ -4,8 +4,8 @@ exposed:
 * `:Delete` will delete the buffer and the file on disk. Will ask
 	to confirm before deleting a buffer with unsaved changes. Two
 	global variables alter its behaviour:
-	1. `g:reflex_delete_cmd` allows to use an external command (like
-		 [trash][trash] on macOS) to delete the file.
+	1. `g:reflex_delete_file_cmd` allows to use an external command
+		 (like [trash][trash] on macOS) to delete the file.
 	2. `g:reflex_delete_buffer_cmd` allows to use a plugin command
 		 to delete the buffer (like `:Bwipeout!` from [Bbye][bbye] to
 		 avoid changing the tab layout). Make sure you pick a command

@@ -110,7 +110,7 @@ do
   local function delete_file0(file_name)
     local exists, cmd0 = nil, nil
     local function _11_()
-      return api.nvim_get_var("reflex_delete_cmd")
+      return api.nvim_get_var("reflex_delete_file_cmd")
     end
     exists, cmd0 = pcall(_11_)
     local _12_
