@@ -73,8 +73,11 @@
 		; User accepts to overwrite it if it exists
 		(= (call :confirm [(.. new-path " already exists. Overwrite it?")]) 1))
 		(local containing-directory (call :fnamemodify [current-path ":h"]))
-		; Ensure the original file can be deleted
-		(if (= (call :filewritable [containing-directory]) 2)
+		(if (or
+			; Ensure the original file can be removed from its original directory...
+			(= (call :filewritable [containing-directory]) 2)
+			; ...or avoid raising an error if the containing directory doesn't exists
+			(= (call :filereadable [containing-directory]) 0))
 			; Ensure the new path can be writen
 			(if (new-path-in-writable-location new-path)
 				(do
