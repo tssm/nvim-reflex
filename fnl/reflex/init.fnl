@@ -35,27 +35,27 @@
 		; There's no external commad
 		(call :delete [file-name])) 0))
 
-(defn- wipe-buffer [name]
-	(local (exists command) (pcall #(api.nvim_get_var "reflex_delete_buffer_cmd")))
-	(cmd (.. (if exists command "bwipeout!") " " name)))
+(defn- wipe-buffer-if-exists [name]
+	(when (= (call :bufexists [name]) 1)
+		(local (exists command) (pcall #(api.nvim_get_var "reflex_delete_buffer_cmd")))
+		(cmd (.. (if exists command "bwipeout!") " " name))))
 
-(defn delete-buffer-and-file []
+(defn delete-buffer-and-file [name]
 	"Wipeout the current buffer and delete its associated file if it exists"
-	(local buffer-name (call :expand ["%"]))
 	(when (or
 		; The buffer hasn't change
-		(= (call :getbufvar [buffer-name "&mod"]) 0)
+		(= (call :getbufvar [name "&mod"]) 0)
 		; The user confirms to delete it
 		(= (call :confirm ["There are unsaved changes. Delete anyway?"]) 1))
 		; There's a file for the buffer
-		(if (not= (call :glob [buffer-name]) "")
-			(if (delete-file buffer-name)
+		(if (not= (call :glob [name]) "")
+			(if (delete-file name)
 				; The file was deleted
-				(wipe-buffer buffer-name)
+				(wipe-buffer-if-exists name)
 				; The file wasn't deleted
 				(show-error "Can't delete asociated file"))
 			; There's no file for the buffer
-			(wipe-buffer buffer-name))))
+			(wipe-buffer-if-exists name))))
 
 ; Determines if the new path or its existent part is writable
 (defn- new-path-in-writable-location [path]
@@ -64,31 +64,30 @@
 		(set part (call :fnamemodify [part ":h"])))
 	(if (> (call :filewritable [part]) 0) true false))
 
-(defn move-to [new-path]
+(defn move [source target]
 	"Move file asociated with the current buffer to a new location"
-	(local current-path (call :expand ["%"]))
 	(when (or
 		; The new file doesn't exists
-		(= (call :glob [new-path]) "")
+		(= (call :glob [target]) "")
 		; User accepts to overwrite it if it exists
-		(= (call :confirm [(.. new-path " already exists. Overwrite it?")]) 1))
-		(local containing-directory (call :fnamemodify [current-path ":h"]))
+		(= (call :confirm [(.. target " already exists. Overwrite it?")]) 1))
+		(local containing-directory (call :fnamemodify [source ":h"]))
 		(if (or
 			; Ensure the original file can be removed from its original directory...
 			(= (call :filewritable [containing-directory]) 2)
 			; ...or avoid raising an error if the containing directory doesn't exists
 			(= (call :filereadable [containing-directory]) 0))
 			; Ensure the new path can be writen
-			(if (new-path-in-writable-location new-path)
+			(if (new-path-in-writable-location target)
 				(do
-					(cmd (.. "keepalt saveas! " new-path))
+					(cmd (.. "keepalt saveas! " target))
 					; Only try to delete current file and buffer if they have a name
-					(when (not= current-path "")
-						(wipe-buffer current-path)
-						(call :delete [current-path])))
-				(show-error (.. "Cannot write to " new-path)))
+					(when (not= source "")
+						(wipe-buffer-if-exists source)
+						(call :delete [source])))
+				(show-error (.. "Cannot write to " target)))
 			; Current file is not writable
-			(show-error (.. "Cannot move " current-path)))))
+			(show-error (.. "Cannot move " source)))))
 
 ; Because the user can set shellslash at run-time a function is used instead of
 ; a local variable
@@ -108,12 +107,11 @@
 		; a list
 		(call :glob [(.. root prefix "*") false true])))
 
-(defn rename-to [input]
+(defn rename [source target]
 	"Move file asociated with the current to a new location relative to the
 	current one"
-	(local current-directory (call :expand ["%:h"]))
+	(local current-directory (call :fnamemodify [source ":h"]))
 	(local new-partial-path (if (= current-directory "")
 		(call :getcwd [])
 		current-directory))
-	(move-to (.. new-partial-path (delimiter) input)))
-
+	(move source (.. new-partial-path (delimiter) target)))
