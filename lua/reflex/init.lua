@@ -114,12 +114,20 @@ local function move(source, target)
     local containing_directory = call("fnamemodify", {source, ":h"})
     if ((call("filewritable", {containing_directory}) == 2) or (call("filereadable", {containing_directory}) == 0)) then
       if new_path_in_writable_location(target) then
-        cmd(("keepalt saveas! " .. target))
-        if (source ~= "") then
-          wipe_buffer_if_exists(source)
-          return call("delete", {source})
+        local success, e = nil, nil
+        local function _14_()
+          return cmd(("keepalt saveas! " .. target))
+        end
+        success, e = pcall(_14_)
+        if success then
+          if (source ~= "") then
+            wipe_buffer_if_exists(source)
+            return call("delete", {source})
+          else
+            return nil
+          end
         else
-          return nil
+          return cmd(("keepalt saveas! " .. source))
         end
       else
         return show_error(("Cannot write to " .. target))
@@ -142,10 +150,10 @@ end
 _2amodule_locals_2a["delimiter"] = delimiter
 local function complete_rename(prefix, cmd0, cursor_position)
   local root = (call("expand", {"%:p:h"}) .. delimiter())
-  local function _19_(_241)
+  local function _21_(_241)
     return call("substitute", {_241, root, "", ""})
   end
-  return a.map(_19_, call("glob", {(root .. prefix .. "*"), false, true}))
+  return a.map(_21_, call("glob", {(root .. prefix .. "*"), false, true}))
 end
 _2amodule_2a["complete-rename"] = complete_rename
 local function rename(source, target)
