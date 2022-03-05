@@ -80,14 +80,14 @@
 			; Ensure the new path can be writen
 			(if (new-path-in-writable-location target)
 				(do
-					(local (success e) (pcall #(cmd (.. "keepalt saveas! " target))))
+					(local (success e) (pcall #(cmd (.. "silent keepalt saveas! " target))))
 					(if success
 						; Only try to delete current file and buffer if they have a name
 						(when (not= source "")
 							(wipe-buffer-if-exists source)
 							(call :delete [source]))
 						; Revert buffer name if the user canceled the directory creation in mkdir-if-needed
-						(cmd (.. "keepalt saveas! " source))))
+						(cmd (.. "silent keepalt saveas! " source))))
 				(show-error (.. "Cannot write to " target)))
 			; Current file is not writable
 			(show-error (.. "Cannot move " source)))))

@@ -116,7 +116,7 @@ local function move(source, target)
       if new_path_in_writable_location(target) then
         local success, e = nil, nil
         local function _14_()
-          return cmd(("keepalt saveas! " .. target))
+          return cmd(("silent keepalt saveas! " .. target))
         end
         success, e = pcall(_14_)
         if success then
@@ -127,7 +127,7 @@ local function move(source, target)
             return nil
           end
         else
-          return cmd(("keepalt saveas! " .. source))
+          return cmd(("silent keepalt saveas! " .. source))
         end
       else
         return show_error(("Cannot write to " .. target))
