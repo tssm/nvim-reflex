@@ -1,4 +1,7 @@
-(module reflex {require {a reflex.aniseed.core}})
+(module reflex {
+	require {
+		a reflex.aniseed.core
+		util reflex.aniseed.nvim.util}})
 
 (def- api vim.api)
 (def- call api.nvim_call_function)
@@ -118,3 +121,16 @@
 		(call :getcwd [])
 		current-directory))
 	(move source (.. new-partial-path (delimiter) target)))
+
+(defn set-up []
+	; Create the commands only for normal buffers
+	(when (= (vim.opt.buftype:get) "")
+		(util.fn-bridge :Delete :reflex :delete-buffer-and-file)
+		(cmd "command! -buffer Delete call Delete(expand('%'))")
+
+		(util.fn-bridge :MoveTo :reflex :move)
+		(cmd "command! -nargs=1 -complete=file -buffer MoveTo call MoveTo(expand('%'), <f-args>)")
+
+		(util.fn-bridge :CompleteRename :reflex :complete-rename)
+		(util.fn-bridge :RenameTo :reflex :rename)
+		(cmd "command! -nargs=1 -complete=customlist,CompleteRename -buffer RenameTo call RenameTo(expand('%'), <f-args>)")))

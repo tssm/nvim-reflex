@@ -10,8 +10,9 @@ do
   _2amodule_2a["aniseed/locals"] = {}
   _2amodule_locals_2a = (_2amodule_2a)["aniseed/locals"]
 end
-local a = require("reflex.aniseed.core")
+local a, util = require("reflex.aniseed.core"), require("reflex.aniseed.nvim.util")
 do end (_2amodule_locals_2a)["a"] = a
+_2amodule_locals_2a["util"] = util
 local api = vim.api
 _2amodule_locals_2a["api"] = api
 local call = api.nvim_call_function
@@ -167,4 +168,18 @@ local function rename(source, target)
   return move(source, (new_partial_path .. delimiter() .. target))
 end
 _2amodule_2a["rename"] = rename
+local function set_up()
+  if ((vim.opt.buftype):get() == "") then
+    util["fn-bridge"]("Delete", "reflex", "delete-buffer-and-file")
+    cmd("command! -buffer Delete call Delete(expand('%'))")
+    util["fn-bridge"]("MoveTo", "reflex", "move")
+    cmd("command! -nargs=1 -complete=file -buffer MoveTo call MoveTo(expand('%'), <f-args>)")
+    util["fn-bridge"]("CompleteRename", "reflex", "complete-rename")
+    util["fn-bridge"]("RenameTo", "reflex", "rename")
+    return cmd("command! -nargs=1 -complete=customlist,CompleteRename -buffer RenameTo call RenameTo(expand('%'), <f-args>)")
+  else
+    return nil
+  end
+end
+_2amodule_2a["set-up"] = set_up
 return _2amodule_2a

@@ -1,16 +1,11 @@
-(module init {require {util reflex.aniseed.nvim.util}})
+(module init)
 
 (def- cmd vim.api.nvim_command)
 
-(util.fn-bridge :Delete :reflex :delete-buffer-and-file)
-(cmd "command! Delete call Delete(expand('%'))")
-
-(util.fn-bridge :MoveTo :reflex :move)
-(cmd "command! -nargs=1 -complete=file MoveTo call MoveTo(expand('%'), <f-args>)")
-
-(util.fn-bridge :CompleteRename :reflex :complete-rename)
-(util.fn-bridge :RenameTo :reflex :rename)
-(cmd "command! -nargs=1 -complete=customlist,CompleteRename RenameTo call RenameTo(expand('%'), <f-args>)")
+(cmd "augroup Reflex")
+(cmd "autocmd!")
+(cmd "autocmd BufReadPost * lua require'reflex'['set-up']()")
+(cmd "augroup END")
 
 (when vim.g.reflex_delete_cmd
   (vim.api.nvim_echo
