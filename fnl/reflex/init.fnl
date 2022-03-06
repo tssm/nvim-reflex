@@ -46,6 +46,8 @@
 (defn delete-buffer-and-file [name]
 	"Wipeout the current buffer and delete its associated file if it exists"
 	(when (or
+		; The buffer doesn't exist
+		(= (call :bufexists [name]) 0)
 		; The buffer hasn't change
 		(= (call :getbufvar [name "&mod"]) 0)
 		; The user confirms to delete it

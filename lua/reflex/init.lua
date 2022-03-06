@@ -83,7 +83,7 @@ local function wipe_buffer_if_exists(name)
 end
 _2amodule_locals_2a["wipe-buffer-if-exists"] = wipe_buffer_if_exists
 local function delete_buffer_and_file(name)
-  if ((call("getbufvar", {name, "&mod"}) == 0) or (call("confirm", {"There are unsaved changes. Delete anyway?"}) == 1)) then
+  if ((call("bufexists", {name}) == 0) or (call("getbufvar", {name, "&mod"}) == 0) or (call("confirm", {"There are unsaved changes. Delete anyway?"}) == 1)) then
     if (call("glob", {name}) ~= "") then
       if delete_file(name) then
         return wipe_buffer_if_exists(name)
