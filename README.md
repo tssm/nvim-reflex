@@ -1,5 +1,6 @@
 Operate in buffers and files at the same time. Three commands are
-exposed:
+exposed on normal buffers (i.e. `:echo &buftype` returns an empty
+string):
 
 * `:Delete` will delete the buffer and the file on disk. Will ask
 	to confirm before deleting a buffer with unsaved changes. Two
@@ -19,6 +20,15 @@ exposed:
 
 Also when you edit a file in a directory that doesn't exists it
 will ask you if you want to create that directory.
+
+# Public functions
+
+The commands are implemented on top of three public functions:
+
+* `delete-buffer-and-file`: Takes the name of the file/buffer to
+	delete.
+* `move` and `rename`: Takes the name of the original file and its
+	new location.
 
 [bbye]: https://github.com/moll/vim-bbye
 [trash]: http://hasseg.org/trash/
