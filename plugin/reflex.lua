@@ -14,6 +14,6 @@ local cmd = vim.api.nvim_command
 _2amodule_locals_2a["cmd"] = cmd
 cmd("augroup Reflex")
 cmd("autocmd!")
-cmd("autocmd BufReadPost * lua require'reflex'['set-up']()")
+cmd("autocmd BufNewFile,BufReadPost * lua require'reflex'['set-up']()")
 cmd("augroup END")
 return _2amodule_2a

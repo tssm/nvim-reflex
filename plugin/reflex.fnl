@@ -4,5 +4,5 @@
 
 (cmd "augroup Reflex")
 (cmd "autocmd!")
-(cmd "autocmd BufReadPost * lua require'reflex'['set-up']()")
+(cmd "autocmd BufNewFile,BufReadPost * lua require'reflex'['set-up']()")
 (cmd "augroup END")
