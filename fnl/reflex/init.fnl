@@ -25,11 +25,6 @@
 		(local (success e) (pcall #(call :mkdir [path-head "p"])))
 		(when (not success) (show-error (.. e "\n")))))
 
-(cmd "augroup MkdirIfNeeded")
-(cmd "autocmd!")
-(cmd "autocmd BufWritePre * lua require'reflex'['mkdir-if-needed']()")
-(cmd "augroup END")
-
 (defn- delete-file [file-name]
 	(local (exists cmd) (pcall #(api.nvim_get_var "reflex_delete_file_cmd")))
 	(= (if exists
@@ -127,6 +122,11 @@
 (defn set-up []
 	; Create the commands only for normal buffers
 	(when (= (vim.opt.buftype:get) "")
+		(cmd "augroup MkdirIfNeeded")
+		(cmd "autocmd!")
+		(cmd "autocmd BufWritePre * lua require'reflex'['mkdir-if-needed']()")
+		(cmd "augroup END")
+
 		(util.fn-bridge :Delete :reflex :delete-buffer-and-file)
 		(cmd "command! -buffer Delete call Delete(expand('%'))")
 

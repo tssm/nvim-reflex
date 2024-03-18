@@ -43,10 +43,6 @@ local function mkdir_if_needed()
   end
 end
 _2amodule_2a["mkdir-if-needed"] = mkdir_if_needed
-cmd("augroup MkdirIfNeeded")
-cmd("autocmd!")
-cmd("autocmd BufWritePre * lua require'reflex'['mkdir-if-needed']()")
-cmd("augroup END")
 local function delete_file(file_name)
   local exists, cmd0 = nil, nil
   local function _4_()
@@ -170,6 +166,10 @@ end
 _2amodule_2a["rename"] = rename
 local function set_up()
   if ((vim.opt.buftype):get() == "") then
+    cmd("augroup MkdirIfNeeded")
+    cmd("autocmd!")
+    cmd("autocmd BufWritePre * lua require'reflex'['mkdir-if-needed']()")
+    cmd("augroup END")
     util["fn-bridge"]("Delete", "reflex", "delete-buffer-and-file")
     cmd("command! -buffer Delete call Delete(expand('%'))")
     util["fn-bridge"]("MoveTo", "reflex", "move")
